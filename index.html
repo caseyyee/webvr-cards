@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebVR bouncy cards.</title>
+    <meta name="description" content="WebVR bouncy cards.">
+    <script src="https://aframe.io/releases/0.5.0/aframe.min.js"></script>
+  </head>
+  <body>
+    <a-scene>
+      <a-assets>
+        <a-mixin id="card" geometry="primitive: plane; width: 0.2; height: 0.3" material="color: #333333; side: double"></a-mixin>
+      </a-assets>
+      
+      <a-plane position="0 0 0" rotation="-90 0 0" width="10" height="20" color="#7BC8A4"></a-plane>
+      <a-sky color="efefef"></a-sky>
+    </a-scene>
+    <script>
+      var scene = document.querySelector('a-scene');
+      var cards = 10;
+      function getRandom(min, max) {
+        if (min < 0) {
+            return min + Math.random() * (Math.abs(min)+max);
+        }else {
+            return min + Math.random() * max;
+        }
+      }
+      var interval = setInterval(function () {
+        var entity = document.createElement('a-entity');
+        entity.setAttribute('mixin', 'card');
+        entity.setAttribute('position', {
+          x: getRandom(-3, 3),
+          y: getRandom(1, 3),
+          z: -5
+        })
+        scene.appendChild(entity);
+        bounceCard(entity);
+        
+        if (--cards < 0) {
+          clearInterval(interval);
+        }
+      }, 1000)
+      
+      
+      function bounceCard(card) {
+        var copies = 200;
+        var velocity = {
+          y: - getRandom(0.001, 0.05),
+          z: getRandom(0.001, 0.2)
+        }
+
+        var delay = 30;
+
+        function cloneCard(card) {
+          var position = card.getAttribute('position');
+          var x = position.x;
+          var y = position.y + velocity.y;
+          var z = position.z + velocity.z;
+          velocity.y -= 0.02;
+          if (y < 0) {
+            y = 0;
+            velocity.y *= -0.7;
+          }
+          var newCard = card.cloneNode();
+          newCard.setAttribute('position', { x: x, y: y, z: z });
+          card.parentNode.appendChild(newCard);
+          return newCard;
+        }
+
+        var lastCard;
+        var interval = setInterval(function () {
+          if (copies > 0) {
+            if (!lastCard) {
+              lastCard = card;
+            }
+            lastCard = cloneCard(lastCard);
+            copies--;
+          } else {
+            clearInterval(interval);
+          }
+        }, delay);
+      }
+      
+    </script>
+  </body>
+</html>
